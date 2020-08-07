@@ -33,7 +33,7 @@ class MainController{
         }).then(response=>{
             const $ = cheerio.load(response.data)
             const element = $('.venz')
-            let episode,uploaded_on,day_updated,thumb,title,link,id
+            let episode,uploaded_on,score,thumb,title,link,id
             element.children().eq(1).find('ul > li').each(function(){
                  $(this).find('.thumb > a').filter(function(){
                      title = $(this).find('.thumbz > h2').text()
@@ -44,8 +44,8 @@ class MainController{
                  })
                  uploaded_on = $(this).find('.newnime').text()
                  episode = $(this).find('.epz').text().replace(' ','')
-                 day_updated = $(this).find('.epztipe').text().replace(' ','')
-                 complete.push({title,id,thumb,episode,uploaded_on,day_updated,link})
+                 score = $(this).find('.epztipe').text().replace(' ','')
+                 complete.push({title,id,thumb,episode,uploaded_on,score,link})
             })
             home.complete = complete
             res.status(200).json({
@@ -71,7 +71,7 @@ class MainController{
             const $ = cheerio.load(response.data)
             const element = $('.venz')
             let animeList = []
-            let episode,uploaded_on,day_updated,thumb,title,link,id
+            let episode,uploaded_on,score,thumb,title,link,id
             element.children().eq(0).find('ul > li').each(function(){
                  $(this).find('.thumb > a').filter(function(){
                      title = $(this).find('.thumbz > h2').text()
@@ -81,8 +81,8 @@ class MainController{
                  })
                  uploaded_on = $(this).find('.newnime').text()
                  episode = $(this).find('.epz').text().replace(' ','')
-                 day_updated = $(this).find('.epztipe').text().replace(' ','')
-                 animeList.push({title,id,thumb,episode,uploaded_on,day_updated,link})
+                 score = $(this).find('.epztipe').text().replace(' ','')
+                 animeList.push({title,id,thumb,episode,uploaded_on,score,link})
             })
             res.status(200).json({
                 status:'success',
@@ -93,15 +93,9 @@ class MainController{
         })
     }
     onGoingAnimeList = (req,res) => {
-        const params = req.params.page
-        const page = typeof params === 'undefined'
-        ?''
-        :params === '1'
-        ? ''
-        :`page/${params}`;
-        const fullUrl = `${baseUrl}${onGoingAnime}${page}`
-        console.log(fullUrl);
-        Axios.get(fullUrl).then(response =>{
+        const url = `${baseUrl}${onGoingAnime}`
+        console.log(url);
+        Axios.get(url).then(response =>{
             const $ = cheerio.load(response.data)
             const element = $('.venz')
             let animeList = []
@@ -120,7 +114,7 @@ class MainController{
             })
             res.status(200).json({
                 status:'success',
-                baseUrl:fullUrl,
+                baseUrl:url,
                 animeList})
         }).catch(err=>{
             console.log(err.message);
@@ -146,6 +140,24 @@ class MainController{
                 scheduleList.push({day,animeList})
             })
             res.json({scheduleList})
+        })
+    }
+    genre = (req,res)=>{
+        const fullUrl = baseUrl+url.genreList
+        Axios.get(fullUrl).then(response=>{
+            const $ = cheerio.load(response.data)
+            const element = $('.genres')
+            let genreList = []
+            element.find('li > a').each(function(){
+                let object = {}
+                object.genre_name = $(this).text()
+                object.id = $(this).attr('href').replace('/','')
+                object.link = baseUrl+object.id
+                genreList.push(object)
+            })
+            res.json({genreList})
+        }).catch(err =>{
+            console.log(err.message);
         })
     }
 }

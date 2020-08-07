@@ -2,10 +2,13 @@
 __BASE URL__ : https://otakudesu.org/
 ### TODO
 - [x] Home
+    - [x] Ongoing
+    - [x] complete
 - [x] Ongoing Pagination
 - [x] Complete Pagination
 - [x] Schedule
-- [ ] Genre List
+- [x] Genre List
+    - [] Anime By Genre
 - [ ] Detail Anime
     - [ ] Batch
     - [ ] Episode List
