@@ -106,7 +106,7 @@ class AnimeController {
         `https://otakudesu.org/wp-admin/admin-ajax.php?action=epslist&id=${id}`
       );
       const episodes$ = cheerio.load(episodesResponse.data);
-      const links = [];
+      const episode_links = [];
       episodes$("body")
         .find("li")
         .each((i, elem) => {
@@ -115,9 +115,28 @@ class AnimeController {
             name: $("li").find("a").attr("href"),
             link: $("li").find("a").text().replace("\n", ""),
           };
-          links.push(episode);
+          episode_links.push(episode);
         });
-      object.links = links;
+      object.episode_links = episode_links;
+
+      const batshResponse = await Axios.get(
+        `https://otakudesu.org/wp-admin/admin-ajax.php?action=batchlist&id=${id}`
+      );
+      const batch$ = cheerio.load(batshResponse.data);
+      const batch_links = [];
+
+      batch$("body")
+        .find("li")
+        .each((i, elem) => {
+          const $ = cheerio.load(elem);
+          const batch = {
+            name: $("li").find("a").attr("href"),
+            link: $("li").find("a").text().replace("\n", ""),
+          };
+          batch_links.push(batch);
+        });
+      object.batch_links = batch_links;
+
       //console.log(epsElement);
       res.json(object);
     } catch (err) {

@@ -14,8 +14,8 @@
   - [x] Anime By Genre
 - [x] Detail Anime
   - [x] Detail
-  - [ ] Batch (Can't get link)
-  - [x] Episode List (Can't get link)
+  - [x] Batch
+  - [x] Episode List
 - [ ] Detail Batch
   - [ ] Download Link
 - [ ] Detail Episode
