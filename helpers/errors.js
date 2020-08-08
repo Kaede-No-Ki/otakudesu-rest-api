@@ -5,4 +5,10 @@ const on404 = (req,res)=>{
         animeList:[]
     })
 }
-module.exports = on404
+const requestFailed = (req,res,err)=>{
+    res.status(502).send({
+        'status':'failed',
+        'message':err.message
+    })
+}
+module.exports = {on404,requestFailed}

@@ -8,9 +8,12 @@ __BASE URL__ : https://otakudesu.org/
 - [x] Complete Pagination
 - [x] Schedule
 - [x] Genre List
-    - [] Anime By Genre
-- [ ] Detail Anime
-    - [ ] Batch
-    - [ ] Episode List
+    - [x] Anime By Genre
+- [x] Detail Anime
+    - [x] Detail
+    - [ ] Batch (Can't get link)
+    - [ ] Episode List (Can't get link)
+- [ ] Detail Batch
+    - [ ] Download Link
 - [ ] Detail Episode
     - [ ] Download Link

@@ -4,8 +4,7 @@ const { default: Axios } = require('axios')
 const baseUrl = url.baseUrl
 const completeAnime = url.completeAnime
 const onGoingAnime = url.onGoingAnime
-// const on404 = require('../helpers/errors')
-
+const errors = require('../helpers/errors')
 
 class MainController{
      home =  (req,res)=>{
@@ -151,13 +150,53 @@ class MainController{
             element.find('li > a').each(function(){
                 let object = {}
                 object.genre_name = $(this).text()
-                object.id = $(this).attr('href').replace('/','')
-                object.link = baseUrl+object.id
+                object.id = $(this).attr('href').replace('/genres/','')
+                object.link = baseUrl+$(this).attr('href')
                 genreList.push(object)
             })
             res.json({genreList})
         }).catch(err =>{
             console.log(err.message);
+        })
+    }
+    animeByGenre = (req,res) => {
+        const pageNumber = req.params.pageNumber
+        const id = req.params.id
+        const fullUrl = baseUrl+`genres/${id}/page/${pageNumber}`
+        console.log(fullUrl);
+        Axios.get(fullUrl).then(response=>{
+            const $ = cheerio.load(response.data)
+            const element = $('.page')
+            let animeList = []
+            let genreList = []
+            let object = {}
+            let genre_name,genre_link,genre_id
+            element.find('.col-md-4').each(function(){
+                object = {}
+                object.anime_name = $(this).find('.col-anime-title').text()
+                object.link = $(this).find('.col-anime-title > a').attr('href')
+                object.id = $(this).find('.col-anime-title > a').attr('href').replace('https://otakudesu.org/anime/','')
+                object.studio = $(this).find('.col-anime-studio').text()
+                object.episode = $(this).find('.col-anime-eps').text()
+                object.score = $(this).find('.col-anime-rating').text()
+                object.release_date = $(this).find('.col-anime-date').text()
+                genreList = []
+                $(this).find('.col-anime-genre > a').each(function(){
+                    genre_name = $(this).text()
+                    genre_link = $(this).attr('href')
+                    genre_id = genre_link.replace('https://otakudesu.org/genres/','')
+                    genreList.push({genre_name,genre_link,genre_id})
+                    object.genre_list = genreList
+                    
+                })
+                animeList.push(object)
+            })
+            res.send({
+                'status': 'success',
+                baseUrl: fullUrl,
+                animeList})
+        }).catch(err =>{
+            errors.requestFailed(req,res,err)
         })
     }
 }
