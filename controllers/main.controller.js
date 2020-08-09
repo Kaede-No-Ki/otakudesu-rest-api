@@ -43,7 +43,7 @@ class MainController{
                  })
                  uploaded_on = $(this).find('.newnime').text()
                  episode = $(this).find('.epz').text().replace(' ','')
-                 score = $(this).find('.epztipe').text().replace(' ','')
+                 score = parseFloat($(this).find('.epztipe').text().replace(' ',''))
                  complete.push({title,id,thumb,episode,uploaded_on,score,link})
             })
             home.complete = complete
@@ -80,7 +80,7 @@ class MainController{
                  })
                  uploaded_on = $(this).find('.newnime').text()
                  episode = $(this).find('.epz').text().replace(' ','')
-                 score = $(this).find('.epztipe').text().replace(' ','')
+                 score = parseFloat($(this).find('.epztipe').text().replace(' ',''))
                  animeList.push({title,id,thumb,episode,uploaded_on,score,link})
             })
             res.status(200).json({
@@ -178,7 +178,7 @@ class MainController{
                 object.id = $(this).find('.col-anime-title > a').attr('href').replace('https://otakudesu.org/anime/','')
                 object.studio = $(this).find('.col-anime-studio').text()
                 object.episode = $(this).find('.col-anime-eps').text()
-                object.score = $(this).find('.col-anime-rating').text()
+                object.score = parseFloat($(this).find('.col-anime-rating').text())
                 object.release_date = $(this).find('.col-anime-date').text()
                 genreList = []
                 $(this).find('.col-anime-genre > a').each(function(){
@@ -197,6 +197,41 @@ class MainController{
                 animeList})
         }).catch(err =>{
             errors.requestFailed(req,res,err)
+        })
+    }
+    search = (req,res) => {
+        const query = req.params.query
+        const fullUrl = `${baseUrl}?s=${query}&post_type=anime`
+        Axios.get(fullUrl).then(response=>{
+            const $ = cheerio.load(response.data)
+            const element = $('.page')
+            let obj = {}
+            let anime_list = []
+            obj.status = 'success',
+            obj.baseUrl = fullUrl
+            element.find('ul > li').each(function(){
+                const genre_list = []
+                $(this).find('.set').find('a').each(function () {
+                    const genre_result = {
+                        genre_title : $(this).text(),
+                        genre_link: $(this).attr('href'),
+                        genre_id : $(this).attr('href').replace(`${baseUrl}genres/`,'')
+                    }
+                    genre_list.push(genre_result)
+                })
+                const results = {
+                    thumb: $(this).find('img').attr('src'),
+                    title: $(this).find('h2').text(),
+                    link: $(this).find('h2 > a').attr('href'),
+                    id: $(this).find('h2 > a').attr('href').replace(`${baseUrl}anime/`,''),
+                    status : $(this).find('.set').eq(1).text().replace('Status : ',''),
+                    score : parseFloat($(this).find('.set').eq(2).text().replace('Rating : ','')),
+                    genre_list,
+                }
+                anime_list.push(results)
+                obj.search_results = anime_list
+            })
+            res.send(obj)
         })
     }
 }

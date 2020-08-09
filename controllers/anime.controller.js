@@ -153,6 +153,82 @@ class AnimeController {
       errors.requestFailed(req, res, err);
     }
   };
+  batchAnime = async(req, res) => {
+      const id = req.params.id
+      const fullUrl = `https://otakudesu.org/batch/${id}`
+      Axios.get(fullUrl).then(response => {
+          const $ = cheerio.load(response.data)
+          const obj = {}
+          obj.title = $('.batchlink > h4').text()
+          obj.status = 'success'
+          obj.baseUrl = fullUrl                
+          let low_quality = _batchQualityFunction(0,response.data)
+          let medium_quality = _batchQualityFunction(1,response.data)
+          let high_quality = _batchQualityFunction(2,response.data)
+          obj.download_list = {low_quality,medium_quality,high_quality}
+        res.send(obj)
+      }).catch(err =>{
+          errors.requestFailed(req, res, err)
+      })
+  }
+  epsAnime = async (req,res) => {
+    const id = req.params.id
+    const fullUrl = `${url.baseUrl}${id}`
+    Axios.get(fullUrl).then(response=>{
+      const $ = cheerio.load(response.data)
+      const streamElement = $('#lightsVideo').find('#embed_holder')
+      const obj = {}
+      obj.title = $('.venutama > h1').text()
+      obj.baseUrl = fullUrl
+      obj.id = fullUrl.replace(url.baseUrl,'')
+      obj.link_stream = streamElement.find('iframe').attr('src')
+      let low_quality = _epsQualityFunction(0,response.data)
+      let medium_quality = _epsQualityFunction(1,response.data)
+      let high_quality = _epsQualityFunction(2,response.data)
+      obj.quality = {low_quality,medium_quality,high_quality}
+      res.send(obj)
+    })
+  }
+}
+
+function _batchQualityFunction(num,res) {
+    const $ = cheerio.load(res)
+    const element = $('.download').find('.batchlink')
+    const download_links = []
+    let response
+    element.find('ul').filter(function () {
+        const quality = $(this).find('li').eq(num).find('strong').text()
+        const size = $(this).find('li').eq(num).find('i').text()
+        $(this).find('li').eq(num).find('a').each(function () {
+          const _list = {
+              host: $(this).text(),
+              link: $(this).attr('href'),
+          }
+          download_links.push(_list)
+          response = {quality,size,download_links}
+        })
+    })
+    return response
+}
+function _epsQualityFunction(num,res){
+  const $ = cheerio.load(res)
+  const element = $('.download')
+  const download_links = []
+  console.log(element.text());
+    let response
+    element.find('ul').filter(function () {
+        const quality = $(this).find('li').eq(num).find('strong').text()
+        const size = $(this).find('li').eq(num).find('i').text()
+        $(this).find('li').eq(num).find('a').each(function () {
+          const _list = {
+              host: $(this).text(),
+              link: $(this).attr('href'),
+          }
+          download_links.push(_list)
+          response = {quality,size,download_links}
+        })
+    })
+    return response
 }
 
 module.exports = new AnimeController();
