@@ -1,4 +1,4 @@
-## OtakuDesu API
+# OtakuDesu API
 <p align="center">
 <img alt="GitHub issues" src="https://img.shields.io/github/issues/Kaede-No-Ki/otakudesu-rest-api">
 <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/Kaede-No-Ki/otakudesu-rest-api">
@@ -10,10 +10,9 @@
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Kaede-No-Ki/otakudesu-rest-api">
 </p>
 
-**BASE URL** : https://otakudesu.org/
+**Unofficial API of** : https://otakudesu.org/
 
-### TODO
-
+## TODO
 - [x] Home
   - [x] Ongoing
   - [x] complete
@@ -51,9 +50,9 @@ or
 npm run dev (you have to install nodemon on your computer)
 ```
 
-### API Documentation
-__Api Path__ : https://otakudesu-api.herokuapp.com/api/
-__API Version__ : v.1
+## API Documentation
+__Api Path__ : https://otakudesu-api.herokuapp.com/api/</br>
+__API Version__ : v1
 
 | Endpoint | Params | Description |
 | -------- | ------ | -----------|
@@ -68,3 +67,11 @@ __API Version__ : v.1
 | /anime/${id} | id | Detail Anime |
 | /batch/${id} | id | Detail Anime's Batch |
 | /eps/${id} | id | Detail Anime's Episode |
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Please make sure to update tests as appropriate.
+
+## License
+[MIT](https://github.com/Kaede-No-Ki/otakudesu-rest-api/blob/master/LICENSE)
