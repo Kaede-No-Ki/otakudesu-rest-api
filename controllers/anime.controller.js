@@ -17,6 +17,7 @@ class AnimeController {
       let object = {};
       let episode_list = [];
       object.thumb = detailElement.find("img").attr("src");
+      object.anime_id = req.params.id
       let genre_name, genre_id, genre_link;
       let genreList = [];
       detailElement.find(".infozin").filter(function () {
@@ -112,30 +113,39 @@ class AnimeController {
         .each((i, elem) => {
           const $ = cheerio.load(elem);
           const episode = {
-            name: $("li").find("a").attr("href"),
-            link: $("li").find("a").text().replace("\n", ""),
+            eps_name: $("li").find("a").text().replace("\n", ""),
+            eps_link: $("li").find("a").attr("href"),
+            eps_id : $("li").find("a").attr("href").replace('https://otakudesu.org/','')
           };
           episode_links.push(episode);
         });
-      object.episode_links = episode_links;
+      object.episode_list = episode_links;
 
-      const batshResponse = await Axios.get(
+      const batchResponse = await Axios.get(
         `https://otakudesu.org/wp-admin/admin-ajax.php?action=batchlist&id=${id}`
       );
-      const batch$ = cheerio.load(batshResponse.data);
+      const batch$ = cheerio.load(batchResponse.data);
       const batch_links = [];
+      const emptyBatch= [
+          {
+              batch_name : 'masih kosong',
+              batch_link : 'masih kosong',
+              batch_id : 'masih kosong',
+          }
+      ]
 
       batch$("body")
         .find("li")
         .each((i, elem) => {
           const $ = cheerio.load(elem);
           const batch = {
-            name: $("li").find("a").attr("href"),
-            link: $("li").find("a").text().replace("\n", ""),
+            batch_name: $("li").find("a").text().replace("\n", ""),
+            batch_link: $("li").find("a").attr("href"),
+            batch_id: $("li").find("a").attr("href").replace('https://otakudesu.org/batch/',''),
           };
           batch_links.push(batch);
         });
-      object.batch_links = batch_links;
+      object.batch_link = batch_links.length === 0 ?emptyBatch : batch_links;
 
       //console.log(epsElement);
       res.json(object);
