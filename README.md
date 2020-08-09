@@ -32,7 +32,7 @@
   - [x] Streaming Link
 - [x] Search
 
-### Usage
+## Usage
 1. Clone this repository
 ```bash
 git clone https://github.com/Kaede-No-Ki/otakudesu-rest-api.git
