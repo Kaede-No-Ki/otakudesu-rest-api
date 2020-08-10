@@ -174,20 +174,31 @@ class AnimeController {
   epsAnime = async (req,res) => {
     const id = req.params.id
     const fullUrl = `${url.baseUrl}${id}`
-    Axios.get(fullUrl).then(response=>{
+    try {
+      const response = await Axios.get(fullUrl);
       const $ = cheerio.load(response.data)
       const streamElement = $('#lightsVideo').find('#embed_holder')
       const obj = {}
       obj.title = $('.venutama > h1').text()
       obj.baseUrl = fullUrl
       obj.id = fullUrl.replace(url.baseUrl,'')
-      obj.link_stream = streamElement.find('iframe').attr('src')
+      const streamLink = streamElement.find('iframe').attr('src')
+      // const streamLinkResponse = await Axios.get(streamLink)
+      // const stream$ = cheerio.load(streamLinkResponse.data)
+      // const sl = stream$('body').find('script').html().search('sources')
+      // const endIndex = stream$('body').find('script').eq(0).html().indexOf('}]',sl)
+      // const val = stream$('body').find('script').eq(0).html().substr(sl,endIndex - sl+1).replace(`sources: [{'file':'`,'')
+      // console.log(val);
+      // console.log(val.replace(`','type':'video/mp4'}`,''));
+      obj.link_stream = streamLink
       let low_quality = _epsQualityFunction(0,response.data)
       let medium_quality = _epsQualityFunction(1,response.data)
       let high_quality = _epsQualityFunction(2,response.data)
       obj.quality = {low_quality,medium_quality,high_quality}
       res.send(obj)
-    })
+    } catch (err) {
+      errors.requestFailed(req, res, err)
+    }
   }
 }
 
@@ -214,7 +225,6 @@ function _epsQualityFunction(num,res){
   const $ = cheerio.load(res)
   const element = $('.download')
   const download_links = []
-  console.log(element.text());
     let response
     element.find('ul').filter(function () {
         const quality = $(this).find('li').eq(num).find('strong').text()
