@@ -5,6 +5,7 @@ const baseUrl = url.baseUrl
 const completeAnime = url.completeAnime
 const onGoingAnime = url.onGoingAnime
 const errors = require('../helpers/errors')
+const ImageList = require('../helpers/image_genre').ImageList
 
 class MainController{
      home =  (req,res)=>{
@@ -147,11 +148,12 @@ class MainController{
             const $ = cheerio.load(response.data)
             const element = $('.genres')
             let genreList = []
-            element.find('li > a').each(function(){
+            element.find('li > a').each(function(i,el){
                 let object = {}
-                object.genre_name = $(this).text()
-                object.id = $(this).attr('href').replace('/genres/','')
-                object.link = baseUrl+$(this).attr('href')
+                object.genre_name = $(el).text()
+                object.id = $(el).attr('href').replace('/genres/','')
+                object.link = baseUrl+$(el).attr('href')
+                object.image_link = ImageList[i]
                 genreList.push(object)
             })
             res.json({genreList})
