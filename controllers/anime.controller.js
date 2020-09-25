@@ -3,8 +3,7 @@ const { default: Axios } = require("axios");
 const cheerio = require("cheerio");
 const errors = require("../helpers/errors");
 
-class AnimeController {
-  detailAnime = async (req, res) => {
+  exports.detailAnime = async (req, res) => {
     const id = req.params.id;
     const fullUrl = url.baseUrl + `anime/${id}`;
     // console.log(fullUrl);
@@ -90,7 +89,7 @@ class AnimeController {
             genre_name = $(this).text();
             genre_id = $(this)
               .attr("href")
-              .replace("https://otakudesu.org/genres/", "");
+              .replace("https://otakudesu.tv/genres/", "");
             genre_link = $(this).attr("href");
             genreList.push({ genre_name, genre_id, genre_link });
             object.genre_list = genreList;
@@ -101,10 +100,10 @@ class AnimeController {
       const startIndex = plainResponse.search(",id:");
       const id = plainResponse
         .substr(startIndex, 20)
-        .split(" ")[1]
-        .split("}")[0];
+        // .split(" ")[1]
+        // .split("}")[0];
       const episodesResponse = await Axios.get(
-        `https://otakudesu.org/wp-admin/admin-ajax.php?action=epslist&id=${id}`
+        `https://otakudesu.tv/wp-admin/admin-ajax.php?action=epslist&id=${id}`
       );
       const episodes$ = cheerio.load(episodesResponse.data);
       const episode_links = [];
@@ -115,14 +114,14 @@ class AnimeController {
           const episode = {
             eps_name: $("li").find("a").text().replace("\n", ""),
             eps_link: $("li").find("a").attr("href"),
-            eps_id : $("li").find("a").attr("href").replace('https://otakudesu.org/','')
+            eps_id : $("li").find("a").attr("href").replace('https://otakudesu.tv/','')
           };
           episode_links.push(episode);
         });
       object.episode_list = episode_links;
 
       const batchResponse = await Axios.get(
-        `https://otakudesu.org/wp-admin/admin-ajax.php?action=batchlist&id=${id}`
+        `https://otakudesu.tv/wp-admin/admin-ajax.php?action=batchlist&id=${id}`
       );
       const batch$ = cheerio.load(batchResponse.data);
       const batch_links = [];
@@ -141,7 +140,7 @@ class AnimeController {
           const batch = {
             batch_name: $("li").find("a").text().replace("\n", ""),
             batch_link: $("li").find("a").attr("href"),
-            batch_id: $("li").find("a").attr("href").replace('https://otakudesu.org/batch/',''),
+            batch_id: $("li").find("a").attr("href").replace('https://otakudesu.tv/batch/',''),
           };
           batch_links.push(batch);
         });
@@ -153,9 +152,9 @@ class AnimeController {
       errors.requestFailed(req, res, err);
     }
   };
-  batchAnime = async(req, res) => {
+  exports.batchAnime = async(req, res) => {
       const id = req.params.id
-      const fullUrl = `https://otakudesu.org/batch/${id}`
+      const fullUrl = `https://otakudesu.tv/batch/${id}`
       Axios.get(fullUrl).then(response => {
           const $ = cheerio.load(response.data)
           const obj = {}
@@ -171,7 +170,7 @@ class AnimeController {
           errors.requestFailed(req, res, err)
       })
   }
-  epsAnime = async (req,res) => {
+  exports.epsAnime = async (req,res) => {
     const id = req.params.id
     const fullUrl = `${url.baseUrl}${id}`
     try {
@@ -200,7 +199,6 @@ class AnimeController {
       errors.requestFailed(req, res, err)
     }
   }
-}
 
 function _batchQualityFunction(num,res) {
     const $ = cheerio.load(res)
@@ -240,5 +238,3 @@ function _epsQualityFunction(num,res){
     })
     return response
 }
-
-module.exports = new AnimeController();
