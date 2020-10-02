@@ -20,6 +20,8 @@ exports.detailAnime = async (req, res) => {
     let genre_name, genre_id, genre_link;
     let genreList = [];
 
+    object.synopsis = $('#venkonten > div.venser > div.fotoanime > div.sinopc').find('p').text();
+
     detailElement.find(".infozin").filter(function () {
       object.title = $(this)
         .find("p")
@@ -33,12 +35,14 @@ exports.detailAnime = async (req, res) => {
         .eq(1)
         .text()
         .replace("Japanese: ", "");
-      object.score = $(this)
+      object.score = parseFloat(
+        $(this)
         .find("p")
         .children()
         .eq(2)
         .text()
-        .replace("Skor: ", "");
+        .replace("Skor: ", "")
+      )
       object.producer = $(this)
         .find("p")
         .children()
@@ -57,12 +61,14 @@ exports.detailAnime = async (req, res) => {
         .eq(5)
         .text()
         .replace("Status: ", "");
-      object.total_episode = $(this)
+      object.total_episode = parseInt(
+        $(this)
         .find("p")
         .children()
         .eq(6)
         .text()
-        .replace("Total Episode: ", "");
+        .replace("Total Episode: ", "")
+      )
       object.duration = $(this)
         .find("p")
         .children()
@@ -97,6 +103,7 @@ exports.detailAnime = async (req, res) => {
         });
     });
     
+
     $('#venkonten > div.venser > div:nth-child(8) > ul > li').each((i, element) => {
       const dataList = {
         title: $(element).find('span > a').text(),
