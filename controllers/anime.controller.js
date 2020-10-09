@@ -2,6 +2,7 @@ const url = require("../helpers/base-url");
 const { default: Axios } = require("axios");
 const cheerio = require("cheerio");
 const errors = require("../helpers/errors");
+const episodeHelper = require("../helpers/episodeHelper");
 
 exports.detailAnime = async (req, res) => {
   const id = req.params.id;
@@ -20,7 +21,9 @@ exports.detailAnime = async (req, res) => {
     let genre_name, genre_id, genre_link;
     let genreList = [];
 
-    object.synopsis = $('#venkonten > div.venser > div.fotoanime > div.sinopc').find('p').text();
+    object.synopsis = $("#venkonten > div.venser > div.fotoanime > div.sinopc")
+      .find("p")
+      .text();
 
     detailElement.find(".infozin").filter(function () {
       object.title = $(this)
@@ -36,13 +39,8 @@ exports.detailAnime = async (req, res) => {
         .text()
         .replace("Japanese: ", "");
       object.score = parseFloat(
-        $(this)
-        .find("p")
-        .children()
-        .eq(2)
-        .text()
-        .replace("Skor: ", "")
-      )
+        $(this).find("p").children().eq(2).text().replace("Skor: ", "")
+      );
       object.producer = $(this)
         .find("p")
         .children()
@@ -62,13 +60,8 @@ exports.detailAnime = async (req, res) => {
         .text()
         .replace("Status: ", "");
       object.total_episode = parseInt(
-        $(this)
-        .find("p")
-        .children()
-        .eq(6)
-        .text()
-        .replace("Total Episode: ", "")
-      )
+        $(this).find("p").children().eq(6).text().replace("Total Episode: ", "")
+      );
       object.duration = $(this)
         .find("p")
         .children()
@@ -102,34 +95,51 @@ exports.detailAnime = async (req, res) => {
           object.genre_list = genreList;
         });
     });
-    
 
-    $('#venkonten > div.venser > div:nth-child(8) > ul > li').each((i, element) => {
-      const dataList = {
-        title: $(element).find('span > a').text(),
-        id: $(element).find('span > a').attr('href').replace('https://otakudesu.tv/',''),
-        link: $(element).find('span > a').attr('href'),
-        uploaded_on : $(element).find('.zeebr').text()
+    $("#venkonten > div.venser > div:nth-child(8) > ul > li").each(
+      (i, element) => {
+        const dataList = {
+          title: $(element).find("span > a").text(),
+          id: $(element)
+            .find("span > a")
+            .attr("href")
+            .replace("https://otakudesu.tv/", ""),
+          link: $(element).find("span > a").attr("href"),
+          uploaded_on: $(element).find(".zeebr").text(),
+        };
+        episode_list.push(dataList);
       }
-      episode_list.push(dataList)
-    })
-    object.episode_list = episode_list.length === 0 ? [{
-      title: 'Masih kosong gan',
-        id: 'Masih kosong gan',
-        link: 'Masih kosong gan',
-        uploaded_on : 'Masih kosong gan'
-    }] : episode_list
+    );
+    object.episode_list =
+      episode_list.length === 0
+        ? [
+            {
+              title: "Masih kosong gan",
+              id: "Masih kosong gan",
+              link: "Masih kosong gan",
+              uploaded_on: "Masih kosong gan",
+            },
+          ]
+        : episode_list;
     const batch_link = {
-      id :$('div.venser > div:nth-child(6) > ul').text().length !== 0 ?
-      $('div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a').attr('href').replace('https://otakudesu.tv/batch/',''):'Masih kosong gan',
-      link : $('div.venser > div:nth-child(6) > ul').text().length !== 0 ?
-      $('div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a').attr('href'): 'Masih kosong gan'
-    }
+      id:
+        $("div.venser > div:nth-child(6) > ul").text().length !== 0
+          ? $("div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a")
+              .attr("href")
+              .replace("https://otakudesu.tv/batch/", "")
+          : "Masih kosong gan",
+      link:
+        $("div.venser > div:nth-child(6) > ul").text().length !== 0
+          ? $(
+              "div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a"
+            ).attr("href")
+          : "Masih kosong gan",
+    };
     const empty_link = {
-      id : 'Masih kosong gan',
-      link : 'Masih kosong gan'
-    }
-    object.batch_link = batch_link
+      id: "Masih kosong gan",
+      link: "Masih kosong gan",
+    };
+    object.batch_link = batch_link;
     //console.log(epsElement);
     res.json(object);
   } catch (err) {
@@ -176,7 +186,7 @@ exports.epsAnime = async (req, res) => {
     // const val = stream$('body').find('script').eq(0).html().substr(sl,endIndex - sl+1).replace(`sources: [{'file':'`,'')
     // console.log(val);
     // console.log(val.replace(`','type':'video/mp4'}`,''));
-    obj.link_stream = streamLink;
+    obj.link_stream = await episodeHelper.get(streamLink);
     let low_quality = _epsQualityFunction(0, response.data);
     let medium_quality = _epsQualityFunction(1, response.data);
     let high_quality = _epsQualityFunction(2, response.data);
