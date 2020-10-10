@@ -7,6 +7,19 @@ const cors = require('cors')
 app.use(cors())
 
 app.use('/api',router)
+app.use('/',(req,res)=>{
+    res.send({
+        message : 'Welcome To Unofficial Otakudesu Rest Api',
+        createdBy : 'KaedeNoKi Team ♥️'
+    })
+})
+app.use('/api',(req,res) =>{
+    res.send({
+        message:'check our github for more info',
+        github :'https://github.com/Kaede-No-Ki/otakudesu-rest-api'
+    })
+})
+
 
 app.use('*',(req,res) =>{
     res.json({
