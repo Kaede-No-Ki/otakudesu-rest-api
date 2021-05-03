@@ -3,6 +3,7 @@ const { default: Axios } = require("axios");
 const cheerio = require("cheerio");
 const errors = require("../helpers/errors");
 const episodeHelper = require("../helpers/episodeHelper");
+const {baseUrl} = require("../helpers/base-url");
 
 exports.detailAnime = async (req, res) => {
   const id = req.params.id;
@@ -89,7 +90,7 @@ exports.detailAnime = async (req, res) => {
           genre_name = $(this).text();
           genre_id = $(this)
             .attr("href")
-            .replace("https://otakudesu.tv/genres/", "");
+            .replace(`https://otakudesu.moe/genres/`, "");
           genre_link = $(this).attr("href");
           genreList.push({ genre_name, genre_id, genre_link });
           object.genre_list = genreList;
@@ -103,7 +104,7 @@ exports.detailAnime = async (req, res) => {
           id: $(element)
             .find("span > a")
             .attr("href")
-            .replace("https://otakudesu.tv/", ""),
+            .replace('https://otakudesu.moe/', ""),
           link: $(element).find("span > a").attr("href"),
           uploaded_on: $(element).find(".zeebr").text(),
         };
@@ -126,7 +127,7 @@ exports.detailAnime = async (req, res) => {
         $("div.venser > div:nth-child(6) > ul").text().length !== 0
           ? $("div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a")
               .attr("href")
-              .replace("https://otakudesu.tv/batch/", "")
+              .replace(`https://otakudesu.moe/batch/`, "")
           : "Masih kosong gan",
       link:
         $("div.venser > div:nth-child(6) > ul").text().length !== 0
@@ -149,7 +150,8 @@ exports.detailAnime = async (req, res) => {
 };
 exports.batchAnime = async (req, res) => {
   const id = req.params.id;
-  const fullUrl = `https://otakudesu.tv/batch/${id}`;
+  const fullUrl = `${baseUrl}batch/${id}`;
+  console.log(fullUrl);
   Axios.get(fullUrl)
     .then((response) => {
       const $ = cheerio.load(response.data);
