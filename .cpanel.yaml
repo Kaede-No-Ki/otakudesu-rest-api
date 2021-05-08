@@ -1,0 +1,5 @@
+
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/kaedenok/anime.kaedenoki.net/anime/
+    - /bin/cp -R * $DEPLOYPATH
