@@ -189,9 +189,16 @@ exports.epsAnime = async (req, res) => {
     // console.log(val);
     // console.log(val.replace(`','type':'video/mp4'}`,''));
     obj.link_stream = await episodeHelper.get(streamLink);
-    let low_quality = _epsQualityFunction(0, response.data);
-    let medium_quality = _epsQualityFunction(1, response.data);
-    let high_quality = _epsQualityFunction(2, response.data);
+    let low_quality;
+    let medium_quality;
+    let high_quality;
+    if($('#venkonten > div.venser > div.venutama > div.download > ul > li:nth-child(1)').text() === ''){
+      low_quality = _notFoundQualityHandler(res.data)
+    }else{
+      low_quality = _epsQualityFunction(0, response.data);
+      medium_quality = _epsQualityFunction(1, response.data);
+      high_quality = _epsQualityFunction(2, response.data);
+    }
     obj.quality = { low_quality, medium_quality, high_quality };
     res.send(obj);
   } catch (err) {
@@ -227,14 +234,11 @@ function _epsQualityFunction(num, res) {
   const element = $(".download");
   const download_links = [];
   let response;
+
   element.find("ul").filter(function () {
     const quality = $(this).find("li").eq(num).find("strong").text();
     const size = $(this).find("li").eq(num).find("i").text();
-    $(this)
-      .find("li")
-      .eq(num)
-      .find("a")
-      .each(function () {
+    $(this).find("li").eq(num).find("a").each(function () {
         const _list = {
           host: $(this).text(),
           link: $(this).attr("href"),
@@ -244,4 +248,13 @@ function _epsQualityFunction(num, res) {
       });
   });
   return response;
+}
+
+function _notFoundQualityHandler(res){
+  const $ = cheerio.load(res);
+  const download_links = [];
+  let response;
+
+  
+
 }

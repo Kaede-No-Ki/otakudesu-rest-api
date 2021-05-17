@@ -135,9 +135,12 @@ exports.completeAnimeList = (req, res) => {
     });
 };
 exports.onGoingAnimeList = (req, res) => {
-  const url = `${baseUrl}${onGoingAnime}`;
-  console.log(url);
-  Axios.get(url)
+  const params = req.params.page;
+  const page = typeof params === "undefined" ? "" : params === "1" ? "" : `page/${params}`;
+  const fullUrl = `${baseUrl}${onGoingAnime}${page}`;
+  // const url = `${baseUrl}${onGoingAnime}`;
+  // console.log(url);
+  Axios.get(fullUrl)
     .then((response) => {
       const $ = cheerio.load(response.data);
       const element = $(".venz");
@@ -171,7 +174,7 @@ exports.onGoingAnimeList = (req, res) => {
         });
       res.status(200).json({
         status: "success",
-        baseUrl: url,
+        baseUrl: baseUrl,
         animeList,
       });
     })
@@ -240,6 +243,7 @@ exports.animeByGenre = (req, res) => {
       element.find(".col-md-4").each(function () {
         object = {};
         object.anime_name = $(this).find(".col-anime-title").text();
+        object.thumb = $(this).find('div.col-anime-cover > img').attr('src')
         object.link = $(this).find(".col-anime-title > a").attr("href");
         object.id = $(this)
           .find(".col-anime-title > a")
