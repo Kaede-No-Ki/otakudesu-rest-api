@@ -7,7 +7,7 @@ const on404 = (req,res)=>{
 }
 const requestFailed = (req,res,err)=>{
     res.status(502).send({
-        'status':'failed',
+        'status':false,
         'message':err.message
     })
 }

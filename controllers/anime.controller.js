@@ -4,6 +4,7 @@ const cheerio = require("cheerio");
 const errors = require("../helpers/errors");
 const episodeHelper = require("../helpers/episodeHelper");
 const {baseUrl} = require("../helpers/base-url");
+const e = require("express");
 
 exports.detailAnime = async (req, res) => {
   const id = req.params.id;
@@ -193,7 +194,9 @@ exports.epsAnime = async (req, res) => {
     let medium_quality;
     let high_quality;
     if($('#venkonten > div.venser > div.venutama > div.download > ul > li:nth-child(1)').text() === ''){
-      low_quality = _notFoundQualityHandler(res.data)
+      low_quality = _notFoundQualityHandler(response.data,0)
+      medium_quality = _notFoundQualityHandler(response.data,1)
+      high_quality = _notFoundQualityHandler(response.data,2)
     }else{
       low_quality = _epsQualityFunction(0, response.data);
       medium_quality = _epsQualityFunction(1, response.data);
@@ -202,6 +205,7 @@ exports.epsAnime = async (req, res) => {
     obj.quality = { low_quality, medium_quality, high_quality };
     res.send(obj);
   } catch (err) {
+    console.log(err);
     errors.requestFailed(req, res, err);
   }
 };
@@ -244,17 +248,47 @@ function _epsQualityFunction(num, res) {
           link: $(this).attr("href"),
         };
         download_links.push(_list);
-        response = { quality, size, download_links };
+        
       });
   });
   return response;
 }
 
-function _notFoundQualityHandler(res){
+function _notFoundQualityHandler(res,num){
   const $ = cheerio.load(res);
   const download_links = [];
+  const element = $('.download')
   let response;
 
-  
+  element.filter(function(){
+    if($(this).find('.anime-box > .anime-title').eq(0).text() === ''){
+      $(this).find('.yondarkness-box').filter(function(){
+        const quality = $(this).find('.yondarkness-title').eq(num).text().split('[')[1].split(']')[0];
+        const size = $(this).find('.yondarkness-title').eq(num).text().split(']')[1].split('[')[1];
+        $(this).find('.yondarkness-item').eq(num).find('a').each((idx,el) => {
+          const _list = {
+            host: $(el).text(),
+            link: $(el).attr("href"),
+          };
+          download_links.push(_list);
+          response = { quality, size, download_links };
+        })
+      })
+    }else{
+      $(this).find('.anime-box').filter(function(){
+        const quality = $(this).find('.anime-title').eq(num).text().split('[')[1].split(']')[0];
+        const size = $(this).find('.anime-title').eq(num).text().split(']')[1].split('[')[1];
+        $(this).find('.anime-item').eq(num).find('a').each((idx,el) => {
+          const _list = {
+            host: $(el).text(),
+            link: $(el).attr("href"),
+          };
+          download_links.push(_list);
+          response = { quality, size, download_links };
+        })
+      })
+    }
+  })
+  return response;
 
 }
