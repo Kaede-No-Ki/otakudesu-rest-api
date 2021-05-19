@@ -6,7 +6,6 @@ const completeAnime = url.completeAnime;
 const onGoingAnime = url.onGoingAnime;
 const errors = require("../helpers/errors");
 const ImageList = require("../helpers/image_genre").ImageList;
-const e = require("express");
 
 exports.home = (req, res) => {
   let home = {};
@@ -28,11 +27,11 @@ exports.home = (req, res) => {
               title = $(this).find(".thumbz > h2").text();
               thumb = $(this).find(".thumbz > img").attr("src");
               link = $(this).attr("href");
-              id = link.replace(`${baseUrl}anime/`, "");
+              id = link.split("/")[4];
             });
           uploaded_on = $(this).find(".newnime").text();
-          episode = $(this).find(".epz").text().replace(" ", "");
-          day_updated = $(this).find(".epztipe").text().replace(" ", "");
+          episode = $(this).find(".epz").text().trim();
+          day_updated = $(this).find(".epztipe").text().trim();
           on_going.push({
             title,
             id,
@@ -61,11 +60,11 @@ exports.home = (req, res) => {
               title = $(this).find(".thumbz > h2").text();
               thumb = $(this).find(".thumbz > img").attr("src");
               link = $(this).attr("href");
-              id = link.replace(`${baseUrl}anime/`, "");
+              id = link.split("/")[4];
             });
           uploaded_on = $(this).find(".newnime").text();
-          episode = $(this).find(".epz").text().replace(" ", "");
-          score = parseFloat($(this).find(".epztipe").text().replace(" ", ""));
+          episode = $(this).find(".epz").text().trim();
+          score = parseFloat($(this).find(".epztipe").text().trim());
           complete.push({
             title,
             id,
@@ -110,11 +109,11 @@ exports.completeAnimeList = (req, res) => {
               title = $(this).find(".thumbz > h2").text();
               thumb = $(this).find(".thumbz > img").attr("src");
               link = $(this).attr("href");
-              id = link.replace(`${baseUrl}anime/`, "");
+              id = link.split("/")[4];
             });
           uploaded_on = $(this).find(".newnime").text();
-          episode = $(this).find(".epz").text().replace(" ", "");
-          score = parseFloat($(this).find(".epztipe").text().replace(" ", ""));
+          episode = $(this).find(".epz").text().trim();
+          score = parseFloat($(this).find(".epztipe").text().trim());
           animeList.push({
             title,
             id,
@@ -137,7 +136,8 @@ exports.completeAnimeList = (req, res) => {
 };
 exports.onGoingAnimeList = (req, res) => {
   const params = req.params.page;
-  const page = typeof params === "undefined" ? "" : params === "1" ? "" : `page/${params}`;
+  const page =
+    typeof params === "undefined" ? "" : params === "1" ? "" : `page/${params}`;
   const fullUrl = `${baseUrl}${onGoingAnime}${page}`;
   // const url = `${baseUrl}${onGoingAnime}`;
   // console.log(url);
@@ -158,11 +158,11 @@ exports.onGoingAnimeList = (req, res) => {
               title = $(this).find(".thumbz > h2").text();
               thumb = $(this).find(".thumbz > img").attr("src");
               link = $(this).attr("href");
-              id = link.replace(`${baseUrl}anime/`, "");
+              id = link.split("/")[4];
             });
           uploaded_on = $(this).find(".newnime").text();
-          episode = $(this).find(".epz").text().replace(" ", "");
-          day_updated = $(this).find(".epztipe").text().replace(" ", "");
+          episode = $(this).find(".epz").text().trim();
+          day_updated = $(this).find(".epztipe").text().trim();
           animeList.push({
             title,
             id,
@@ -244,7 +244,7 @@ exports.animeByGenre = (req, res) => {
       element.find(".col-md-4").each(function () {
         object = {};
         object.anime_name = $(this).find(".col-anime-title").text();
-        object.thumb = $(this).find('div.col-anime-cover > img').attr('src')
+        object.thumb = $(this).find("div.col-anime-cover > img").attr("src");
         object.link = $(this).find(".col-anime-title > a").attr("href");
         object.id = $(this)
           .find(".col-anime-title > a")
@@ -285,12 +285,15 @@ exports.search = (req, res) => {
     let obj = {};
     let anime_list = [];
     (obj.status = "success"), (obj.baseUrl = fullUrl);
-    if(element.find("ul > li").length === 0){
+    if (element.find("ul > li").length === 0) {
       obj.search_results = [];
-    }else {
+    } else {
       element.find("ul > li").each(function () {
         const genre_list = [];
-        $(this).find(".set").find("a").each(function () {
+        $(this)
+          .find(".set")
+          .find("a")
+          .each(function () {
             const genre_result = {
               genre_title: $(this).text(),
               genre_link: $(this).attr("href"),
@@ -302,7 +305,7 @@ exports.search = (req, res) => {
           thumb: $(this).find("img").attr("src"),
           title: $(this).find("h2").text(),
           link: $(this).find("h2 > a").attr("href"),
-          id: $(this).find("h2 > a").attr("href").replace(`${baseUrl}anime/`, ""),
+          id: $(this).find("h2 > a").attr("href").split("/")[4],
           status: $(this).find(".set").eq(1).text().replace("Status : ", ""),
           score: parseFloat(
             $(this).find(".set").eq(2).text().replace("Rating : ", "")

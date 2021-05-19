@@ -124,7 +124,7 @@ exports.epsAnime = async (req, res) => {
     const obj = {};
     obj.title = $(".venutama > h1").text();
     obj.baseUrl = fullUrl;
-    obj.id = fullUrl.replace(url.baseUrl, "");
+    obj.id = id;
     const streamLink = streamElement.find("iframe").attr("src");
     // const streamLinkResponse = await Axios.get(streamLink)
     // const stream$ = cheerio.load(streamLinkResponse.data)
