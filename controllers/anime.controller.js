@@ -4,7 +4,6 @@ const cheerio = require("cheerio");
 const errors = require("../helpers/errors");
 const episodeHelper = require("../helpers/episodeHelper");
 const { baseUrl } = require("../helpers/base-url");
-const e = require("express");
 
 exports.detailAnime = async (req, res) => {
   const id = req.params.id;
@@ -52,7 +51,7 @@ exports.detailAnime = async (req, res) => {
       id: $("div.venser > div:nth-child(6) > ul").text()
         ? $("div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a")
             .attr("href")
-            .replace(`https://otakudesu.moe/batch/`, "")
+            .split("/")[4]
         : "Masih kosong gan",
       link: $("div.venser > div:nth-child(6) > ul").text().length
         ? $(
@@ -97,19 +96,19 @@ exports.detailAnime = async (req, res) => {
 exports.batchAnime = async (req, res) => {
   const id = req.params.id;
   const fullUrl = `${baseUrl}batch/${id}`;
-  console.log(fullUrl);
   Axios.get(fullUrl)
     .then((response) => {
       const $ = cheerio.load(response.data);
-      const obj = {};
-      obj.title = $(".batchlink > h4").text();
-      obj.status = "success";
-      obj.baseUrl = fullUrl;
-      let low_quality = _batchQualityFunction(0, response.data);
-      let medium_quality = _batchQualityFunction(1, response.data);
-      let high_quality = _batchQualityFunction(2, response.data);
-      obj.download_list = { low_quality, medium_quality, high_quality };
-      res.send(obj);
+      res.json({
+        title: $(".batchlink > h4").text(),
+        status: "success",
+        baseUrl: fullUrl,
+        download_list: {
+          low_quality: _batchQualityFunction(0, response.data),
+          medium_quality: _batchQualityFunction(1, response.data),
+          high_quality: _batchQualityFunction(2, response.data),
+        },
+      });
     })
     .catch((err) => {
       errors.requestFailed(req, res, err);
@@ -164,25 +163,26 @@ exports.epsAnime = async (req, res) => {
 function _batchQualityFunction(num, res) {
   const $ = cheerio.load(res);
   const element = $(".download").find(".batchlink");
-  const download_links = [];
-  let response;
-  element.find("ul").filter(function () {
-    const quality = $(this).find("li").eq(num).find("strong").text();
-    const size = $(this).find("li").eq(num).find("i").text();
-    $(this)
-      .find("li")
-      .eq(num)
-      .find("a")
-      .each(function () {
-        const _list = {
-          host: $(this).text(),
-          link: $(this).attr("href"),
-        };
-        download_links.push(_list);
-        response = { quality, size, download_links };
-      });
-  });
-  return response;
+  return element
+    .find("ul")
+    .toArray()
+    .map((ul) => {
+      return {
+        quality: $(ul).find("li").eq(num).find("strong").text(),
+        size: $(ul).find("li").eq(num).find("i").text(),
+        download_links: $(ul)
+          .find("li")
+          .eq(num)
+          .find("a")
+          .toArray()
+          .map((li) => {
+            return {
+              host: $(li).text(),
+              link: $(li).attr("href"),
+            };
+          }),
+      };
+    });
 }
 function _epsQualityFunction(num, res) {
   const $ = cheerio.load(res);
