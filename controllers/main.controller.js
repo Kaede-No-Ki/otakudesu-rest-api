@@ -6,6 +6,7 @@ const completeAnime = url.completeAnime;
 const onGoingAnime = url.onGoingAnime;
 const errors = require("../helpers/errors");
 const ImageList = require("../helpers/image_genre").ImageList;
+const e = require("express");
 
 exports.home = (req, res) => {
   let home = {};
@@ -284,33 +285,34 @@ exports.search = (req, res) => {
     let obj = {};
     let anime_list = [];
     (obj.status = "success"), (obj.baseUrl = fullUrl);
-    element.find("ul > li").each(function () {
-      const genre_list = [];
-      $(this)
-        .find(".set")
-        .find("a")
-        .each(function () {
-          const genre_result = {
-            genre_title: $(this).text(),
-            genre_link: $(this).attr("href"),
-            genre_id: $(this).attr("href").replace(`${baseUrl}genres/`, ""),
-          };
-          genre_list.push(genre_result);
-        });
-      const results = {
-        thumb: $(this).find("img").attr("src"),
-        title: $(this).find("h2").text(),
-        link: $(this).find("h2 > a").attr("href"),
-        id: $(this).find("h2 > a").attr("href").replace(`${baseUrl}anime/`, ""),
-        status: $(this).find(".set").eq(1).text().replace("Status : ", ""),
-        score: parseFloat(
-          $(this).find(".set").eq(2).text().replace("Rating : ", "")
-        ),
-        genre_list,
-      };
-      anime_list.push(results);
-      obj.search_results = anime_list;
-    });
+    if(element.find("ul > li").length === 0){
+      obj.search_results = [];
+    }else {
+      element.find("ul > li").each(function () {
+        const genre_list = [];
+        $(this).find(".set").find("a").each(function () {
+            const genre_result = {
+              genre_title: $(this).text(),
+              genre_link: $(this).attr("href"),
+              genre_id: $(this).attr("href").replace(`${baseUrl}genres/`, ""),
+            };
+            genre_list.push(genre_result);
+          });
+        const results = {
+          thumb: $(this).find("img").attr("src"),
+          title: $(this).find("h2").text(),
+          link: $(this).find("h2 > a").attr("href"),
+          id: $(this).find("h2 > a").attr("href").replace(`${baseUrl}anime/`, ""),
+          status: $(this).find(".set").eq(1).text().replace("Status : ", ""),
+          score: parseFloat(
+            $(this).find(".set").eq(2).text().replace("Rating : ", "")
+          ),
+          genre_list,
+        };
+        anime_list.push(results);
+        obj.search_results = anime_list;
+      });
+    }
     res.send(obj);
   });
 };

@@ -194,10 +194,12 @@ exports.epsAnime = async (req, res) => {
     let medium_quality;
     let high_quality;
     if($('#venkonten > div.venser > div.venutama > div.download > ul > li:nth-child(1)').text() === ''){
+      console.log('ul is empty');
       low_quality = _notFoundQualityHandler(response.data,0)
       medium_quality = _notFoundQualityHandler(response.data,1)
       high_quality = _notFoundQualityHandler(response.data,2)
     }else{
+      console.log('ul is not empty');
       low_quality = _epsQualityFunction(0, response.data);
       medium_quality = _epsQualityFunction(1, response.data);
       high_quality = _epsQualityFunction(2, response.data);
@@ -248,6 +250,7 @@ function _epsQualityFunction(num, res) {
           link: $(this).attr("href"),
         };
         download_links.push(_list);
+        response = { quality, size, download_links };
         
       });
   });
