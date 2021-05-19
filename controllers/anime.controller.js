@@ -3,147 +3,92 @@ const { default: Axios } = require("axios");
 const cheerio = require("cheerio");
 const errors = require("../helpers/errors");
 const episodeHelper = require("../helpers/episodeHelper");
-const {baseUrl} = require("../helpers/base-url");
+const { baseUrl } = require("../helpers/base-url");
 const e = require("express");
 
 exports.detailAnime = async (req, res) => {
   const id = req.params.id;
   const fullUrl = url.baseUrl + `anime/${id}`;
-  // console.log(fullUrl);
   try {
     const response = await Axios.get(fullUrl);
-
     const $ = cheerio.load(response.data);
-    const detailElement = $(".venser").find(".fotoanime");
-    const epsElement = $("#_epslist").html();
-    let object = {};
-    let episode_list = [];
-    object.thumb = detailElement.find("img").attr("src");
-    object.anime_id = req.params.id;
-    let genre_name, genre_id, genre_link;
-    let genreList = [];
 
-    object.synopsis = $("#venkonten > div.venser > div.fotoanime > div.sinopc")
-      .find("p")
-      .text();
+    const temp = $(".infozingle b")
+      .map((i, elem) => $(elem).text() + ": ")
+      .get();
+    const information = $(".infozingle")
+      .text()
+      .split(new RegExp(temp.join("|")));
 
-    detailElement.find(".infozin").filter(function () {
-      object.title = $(this)
-        .find("p")
-        .children()
-        .eq(0)
-        .text()
-        .replace("Judul: ", "");
-      object.japanase = $(this)
-        .find("p")
-        .children()
-        .eq(1)
-        .text()
-        .replace("Japanese: ", "");
-      object.score = parseFloat(
-        $(this).find("p").children().eq(2).text().replace("Skor: ", "")
-      );
-      object.producer = $(this)
-        .find("p")
-        .children()
-        .eq(3)
-        .text()
-        .replace("Produser:  ", "");
-      object.type = $(this)
-        .find("p")
-        .children()
-        .eq(4)
-        .text()
-        .replace("Tipe: ", "");
-      object.status = $(this)
-        .find("p")
-        .children()
-        .eq(5)
-        .text()
-        .replace("Status: ", "");
-      object.total_episode = parseInt(
-        $(this).find("p").children().eq(6).text().replace("Total Episode: ", "")
-      );
-      object.duration = $(this)
-        .find("p")
-        .children()
-        .eq(7)
-        .text()
-        .replace("Durasi: ", "");
-      object.release_date = $(this)
-        .find("p")
-        .children()
-        .eq(8)
-        .text()
-        .replace("Tanggal Rilis: ", "");
-      object.studio = $(this)
-        .find("p")
-        .children()
-        .eq(9)
-        .text()
-        .replace("Studio: ", "");
-      $(this)
-        .find("p")
-        .children()
-        .eq(10)
-        .find("span > a")
-        .each(function () {
-          genre_name = $(this).text();
-          genre_id = $(this)
-            .attr("href")
-            .replace(`https://otakudesu.moe/genres/`, "");
-          genre_link = $(this).attr("href");
-          genreList.push({ genre_name, genre_id, genre_link });
-          object.genre_list = genreList;
-        });
-    });
+    const synopsis = $(".sinopc > p")
+      .toArray()
+      .map((ele) => $(ele).text())
+      .join("\n\n")
+      .split("Tonton")[0]
+      .trim();
 
-    $("#venkonten > div.venser > div:nth-child(8) > ul > li").each(
-      (i, element) => {
-        const dataList = {
+    let episode_list = $("#venkonten > div.venser > div:nth-child(8) > ul > li")
+      .toArray()
+      .map((element) => {
+        return {
           title: $(element).find("span > a").text(),
-          id: $(element)
-            .find("span > a")
-            .attr("href")
-            .replace('https://otakudesu.moe/', ""),
+          id: $(element).find("span > a").attr("href").split("/")[3],
           link: $(element).find("span > a").attr("href"),
           uploaded_on: $(element).find(".zeebr").text(),
         };
-        episode_list.push(dataList);
-      }
-    );
-    object.episode_list =
-      episode_list.length === 0
-        ? [
-            {
-              title: "Masih kosong gan",
-              id: "Masih kosong gan",
-              link: "Masih kosong gan",
-              uploaded_on: "Masih kosong gan",
-            },
-          ]
-        : episode_list;
+      });
+
+    episode_list = episode_list.length
+      ? episode_list
+      : [
+          {
+            title: "Masih kosong gan",
+            id: "Masih kosong gan",
+            link: "Masih kosong gan",
+            uploaded_on: "Masih kosong gan",
+          },
+        ];
     const batch_link = {
-      id:
-        $("div.venser > div:nth-child(6) > ul").text().length !== 0
-          ? $("div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a")
-              .attr("href")
-              .replace(`https://otakudesu.moe/batch/`, "")
-          : "Masih kosong gan",
-      link:
-        $("div.venser > div:nth-child(6) > ul").text().length !== 0
-          ? $(
-              "div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a"
-            ).attr("href")
-          : "Masih kosong gan",
+      id: $("div.venser > div:nth-child(6) > ul").text()
+        ? $("div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a")
+            .attr("href")
+            .replace(`https://otakudesu.moe/batch/`, "")
+        : "Masih kosong gan",
+      link: $("div.venser > div:nth-child(6) > ul").text().length
+        ? $(
+            "div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a"
+          ).attr("href")
+        : "Masih kosong gan",
     };
-    const empty_link = {
-      id: "Masih kosong gan",
-      link: "Masih kosong gan",
-    };
-    object.batch_link = batch_link;
     //console.log(epsElement);
-    res.json(object);
+    res.json({
+      anime_id: req.params.id,
+      thumb: $(".fotoanime img").attr("src"),
+      title: information[1],
+      japanese: information[2],
+      score: parseFloat(information[3]),
+      producer: information[4],
+      type: information[5],
+      status: information[6],
+      total_episode: parseInt(information[7]),
+      duration: information[8],
+      release_date: information[9],
+      studio: information[10],
+      genre_list: $(".infozingle span")
+        .last()
+        .find("a")
+        .toArray()
+        .map((g) => {
+          return {
+            genre_name: $(g).text(),
+            genre_id: $(g).attr("href").split("/")[4],
+            genre_link: $(g).attr("href"),
+          };
+        }),
+      synopsis,
+      episode_list,
+      batch_link,
+    });
   } catch (err) {
     console.log(err);
     errors.requestFailed(req, res, err);
@@ -193,13 +138,17 @@ exports.epsAnime = async (req, res) => {
     let low_quality;
     let medium_quality;
     let high_quality;
-    if($('#venkonten > div.venser > div.venutama > div.download > ul > li:nth-child(1)').text() === ''){
-      console.log('ul is empty');
-      low_quality = _notFoundQualityHandler(response.data,0)
-      medium_quality = _notFoundQualityHandler(response.data,1)
-      high_quality = _notFoundQualityHandler(response.data,2)
-    }else{
-      console.log('ul is not empty');
+    if (
+      $(
+        "#venkonten > div.venser > div.venutama > div.download > ul > li:nth-child(1)"
+      ).text() === ""
+    ) {
+      console.log("ul is empty");
+      low_quality = _notFoundQualityHandler(response.data, 0);
+      medium_quality = _notFoundQualityHandler(response.data, 1);
+      high_quality = _notFoundQualityHandler(response.data, 2);
+    } else {
+      console.log("ul is not empty");
       low_quality = _epsQualityFunction(0, response.data);
       medium_quality = _epsQualityFunction(1, response.data);
       high_quality = _epsQualityFunction(2, response.data);
@@ -244,54 +193,88 @@ function _epsQualityFunction(num, res) {
   element.find("ul").filter(function () {
     const quality = $(this).find("li").eq(num).find("strong").text();
     const size = $(this).find("li").eq(num).find("i").text();
-    $(this).find("li").eq(num).find("a").each(function () {
+    $(this)
+      .find("li")
+      .eq(num)
+      .find("a")
+      .each(function () {
         const _list = {
           host: $(this).text(),
           link: $(this).attr("href"),
         };
         download_links.push(_list);
         response = { quality, size, download_links };
-        
       });
   });
   return response;
 }
 
-function _notFoundQualityHandler(res,num){
+function _notFoundQualityHandler(res, num) {
   const $ = cheerio.load(res);
   const download_links = [];
-  const element = $('.download')
+  const element = $(".download");
   let response;
 
-  element.filter(function(){
-    if($(this).find('.anime-box > .anime-title').eq(0).text() === ''){
-      $(this).find('.yondarkness-box').filter(function(){
-        const quality = $(this).find('.yondarkness-title').eq(num).text().split('[')[1].split(']')[0];
-        const size = $(this).find('.yondarkness-title').eq(num).text().split(']')[1].split('[')[1];
-        $(this).find('.yondarkness-item').eq(num).find('a').each((idx,el) => {
-          const _list = {
-            host: $(el).text(),
-            link: $(el).attr("href"),
-          };
-          download_links.push(_list);
-          response = { quality, size, download_links };
-        })
-      })
-    }else{
-      $(this).find('.anime-box').filter(function(){
-        const quality = $(this).find('.anime-title').eq(num).text().split('[')[1].split(']')[0];
-        const size = $(this).find('.anime-title').eq(num).text().split(']')[1].split('[')[1];
-        $(this).find('.anime-item').eq(num).find('a').each((idx,el) => {
-          const _list = {
-            host: $(el).text(),
-            link: $(el).attr("href"),
-          };
-          download_links.push(_list);
-          response = { quality, size, download_links };
-        })
-      })
+  element.filter(function () {
+    if ($(this).find(".anime-box > .anime-title").eq(0).text() === "") {
+      $(this)
+        .find(".yondarkness-box")
+        .filter(function () {
+          const quality = $(this)
+            .find(".yondarkness-title")
+            .eq(num)
+            .text()
+            .split("[")[1]
+            .split("]")[0];
+          const size = $(this)
+            .find(".yondarkness-title")
+            .eq(num)
+            .text()
+            .split("]")[1]
+            .split("[")[1];
+          $(this)
+            .find(".yondarkness-item")
+            .eq(num)
+            .find("a")
+            .each((idx, el) => {
+              const _list = {
+                host: $(el).text(),
+                link: $(el).attr("href"),
+              };
+              download_links.push(_list);
+              response = { quality, size, download_links };
+            });
+        });
+    } else {
+      $(this)
+        .find(".anime-box")
+        .filter(function () {
+          const quality = $(this)
+            .find(".anime-title")
+            .eq(num)
+            .text()
+            .split("[")[1]
+            .split("]")[0];
+          const size = $(this)
+            .find(".anime-title")
+            .eq(num)
+            .text()
+            .split("]")[1]
+            .split("[")[1];
+          $(this)
+            .find(".anime-item")
+            .eq(num)
+            .find("a")
+            .each((idx, el) => {
+              const _list = {
+                host: $(el).text(),
+                link: $(el).attr("href"),
+              };
+              download_links.push(_list);
+              response = { quality, size, download_links };
+            });
+        });
     }
-  })
+  });
   return response;
-
 }
