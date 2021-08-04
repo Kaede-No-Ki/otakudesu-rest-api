@@ -190,9 +190,35 @@ exports.epsAnime = async (req, res) => {
     // console.log(val);
     // console.log(val.replace(`','type':'video/mp4'}`,''));
     obj.link_stream = await episodeHelper.get(streamLink);
+    console.log($('#pembed > div > iframe').attr('src'));
     let low_quality;
     let medium_quality;
     let high_quality;
+    let mirror1 = [];
+    let mirror2 = [];
+    let mirror3 = [];
+
+    $('#embed_holder > div.mirrorstream > ul.m360p > li').each((idx,el)=>{``
+      mirror1.push({
+        host:$(el).find('a').text().trim(),
+        id:$(el).find('a').attr('href'),
+      });
+    });
+    $('#embed_holder > div.mirrorstream > ul.m480p > li').each((idx,el)=>{
+      mirror2.push({
+        host:$(el).find('a').text().trim(),
+        id:$(el).find('a').attr('href'),
+      });
+    });
+    $('#embed_holder > div.mirrorstream > ul.m720p > li').each((idx,el)=>{
+      mirror3.push({
+        host:$(el).find('a').text().trim(),
+        id:$(el).find('a').attr('href'),
+      });
+    });
+    obj.mirror1 = {quality:'360p',mirrorList:mirror1}
+    obj.mirror2 = {quality:'480p',mirrorList:mirror2}
+    obj.mirror3 = {quality:'720p',mirrorList:mirror3}
     if($('#venkonten > div.venser > div.venutama > div.download > ul > li:nth-child(1)').text() === ''){
       console.log('ul is empty');
       low_quality = _notFoundQualityHandler(response.data,0)
@@ -211,6 +237,27 @@ exports.epsAnime = async (req, res) => {
     errors.requestFailed(req, res, err);
   }
 };
+
+exports.epsMirror = async (req, res) => {
+  const mirrorId = req.body.mirrorId;
+  const animeId = req.params.animeId;
+  const fullUrl = `${baseUrl}${animeId}/${mirrorId}`;
+  try {
+    const response = await Axios.get(fullUrl);
+    const $ = cheerio.load(response.data);
+    const obj = {};
+    obj.title = $(".venutama > h1").text();
+    obj.baseUrl = fullUrl;
+    obj.id = fullUrl.replace(url.baseUrl, "");
+    const streamLink = $('#pembed > div > iframe').attr('src')
+    obj.streamLink = streamLink
+    obj.link_stream = await episodeHelper.get(streamLink);
+    res.send(obj);
+  } catch (error) {
+    console.log(error);
+    errors.requestFailed(req, res, err);
+  }
+}
 
 function _batchQualityFunction(num, res) {
   const $ = cheerio.load(res);
