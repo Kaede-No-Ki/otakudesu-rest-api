@@ -8,6 +8,7 @@ const get = async (url) => {
     let source2 = $.html().search("'file':");
     console.log(source1);
     console.log(source2);
+    
     if (source1 !== -1) {
       const end = $.html().indexOf('","');
       return $.html().substring(source1 + 8, end);
@@ -15,7 +16,8 @@ const get = async (url) => {
       const end = $.html().indexOf("','");
       return $.html().substring(source2 + 8, end);
     }
-    return "-";
+    const _url = $('body > #mediaplayer > source').attr('src');
+    return _url || '-';
   } catch (error) {
     return "-";
   }

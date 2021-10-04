@@ -5,8 +5,14 @@ const router = require('./routes/index')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const fileUpload = require('express-fileupload')
+const mongoose = require('mongoose')
 
 app.use(cors())
+
+mongoose.connect('your-db-url',{
+    useNewUrlParser:true,useUnifiedTopology:true,useFindAndModify:false,useCreateIndex:true
+}).then(()=>console.log('connected to database'))
+.catch(err => console.log(err))
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}))
