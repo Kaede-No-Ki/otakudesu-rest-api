@@ -13,13 +13,13 @@ app.use(bodyParser.urlencoded({extended:true}))
 app.use(fileUpload({createParentPath:true}))
 
 app.use('/api',router)
-app.use('/',(req,res)=>{
+app.get('/',(req,res)=>{
     res.send({
         message : 'Welcome To Unofficial Otakudesu Rest Api',
         createdBy : 'KaedeNoKi Team ♥️'
     })
 })
-app.use('/api',(req,res) =>{
+app.get('/api',(req,res) =>{
     res.send({
         message:'check our github for more info',
         github :'https://github.com/Kaede-No-Ki/otakudesu-rest-api'
@@ -27,7 +27,7 @@ app.use('/api',(req,res) =>{
 })
 
 
-app.use('*',(req,res) =>{
+app.get('*',(req,res) =>{
     res.json({
         'status':'not found path',
         message: 'read the docs here https://github.com/Kaede-No-Ki/otakudesu-rest-api'
