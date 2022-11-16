@@ -91,7 +91,7 @@ exports.detailAnime = async (req, res) => {
           genre_name = $(this).text();
           genre_id = $(this)
             .attr("href")
-            .replace(`https://otakudesu.moe/genres/`, "");
+            .replace(`https://otakudesu.bid/genres/`, "");
           genre_link = $(this).attr("href");
           genreList.push({ genre_name, genre_id, genre_link });
           object.genre_list = genreList;
@@ -105,7 +105,7 @@ exports.detailAnime = async (req, res) => {
           id: $(element)
             .find("span > a")
             .attr("href")
-            .replace('https://otakudesu.moe/', ""),
+            .replace('https://otakudesu.bid/episode/', ""),
           link: $(element).find("span > a").attr("href"),
           uploaded_on: $(element).find(".zeebr").text(),
         };
@@ -128,7 +128,7 @@ exports.detailAnime = async (req, res) => {
         $("div.venser > div:nth-child(6) > ul").text().length !== 0
           ? $("div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a")
               .attr("href")
-              .replace(`https://otakudesu.moe/batch/`, "")
+              .replace(`https://otakudesu.bid/batch/`, "")
           : "Masih kosong gan",
       link:
         $("div.venser > div:nth-child(6) > ul").text().length !== 0
@@ -172,7 +172,7 @@ exports.batchAnime = async (req, res) => {
 };
 exports.epsAnime = async (req, res) => {
   const id = req.params.id;
-  const fullUrl = `${url.baseUrl}${id}`;
+  const fullUrl = `${url.baseUrl}episode/${id}`;
   try {
     const response = await Axios.get(fullUrl);
     const $ = cheerio.load(response.data);
