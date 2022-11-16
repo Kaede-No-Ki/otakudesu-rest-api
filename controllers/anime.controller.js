@@ -261,7 +261,7 @@ exports.epsMirror = async (req, res) => {
 
 function _batchQualityFunction(num, res) {
   const $ = cheerio.load(res);
-  const element = $(".download").find(".batchlink");
+  const element = $(".download2").find(".batchlink");
   const download_links = [];
   let response;
   element.find("ul").filter(function () {
